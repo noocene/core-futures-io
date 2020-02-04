@@ -1,0 +1,16 @@
+[package]
+name = "core-futures-io"
+version = "0.1.0"
+authors = ["Izzy Swart <zenerboson@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+bytes = { version = "0.5.4", default-features = false }
+futures = { version = "0.3.2", default-features = false }
+genio = { version = "0.2.1", default-features = false }
+void = { version = "1.0.2", optional = true, default-features = false }
+
+[features]
+std = ["bytes/std", "futures/std", "genio/std", "alloc", "void/std"]
+alloc = ["futures/alloc", "void"]
+default = ["std", "alloc"]
