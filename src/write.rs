@@ -1,3 +1,4 @@
+use _futures::ready;
 use bytes::Buf;
 #[cfg(not(feature = "std"))]
 use core::ops::DerefMut;
@@ -5,7 +6,6 @@ use core::{
     pin::Pin,
     task::{Context, Poll},
 };
-use futures::ready;
 
 pub trait AsyncWrite {
     type Error;

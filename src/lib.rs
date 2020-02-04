@@ -11,4 +11,9 @@ pub use write::AsyncWrite;
 #[cfg(feature = "tokio")]
 mod tokio;
 #[cfg(feature = "tokio")]
-pub use self::tokio::Compat;
+pub use self::tokio::Compat as TokioCompat;
+
+#[cfg(feature = "futures")]
+mod futures;
+#[cfg(feature = "futures")]
+pub use self::futures::Compat as FuturesCompat;

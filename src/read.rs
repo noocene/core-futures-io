@@ -1,3 +1,4 @@
+use _futures::ready;
 use bytes::BufMut;
 #[cfg(not(feature = "std"))]
 use core::ops::DerefMut;
@@ -6,7 +7,6 @@ use core::{
     pin::Pin,
     task::{Context, Poll},
 };
-use futures::ready;
 #[cfg(not(feature = "std"))]
 use genio::Read;
 

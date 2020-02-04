@@ -6,13 +6,14 @@ edition = "2018"
 
 [dependencies]
 bytes = { version = "0.5.4", default-features = false }
-futures = { version = "0.3.2", default-features = false }
+_futures = { package = "futures", version = "0.3.2", default-features = false }
 genio = { version = "0.2.1", default-features = false }
 void = { version = "1.0.2", optional = true, default-features = false }
 _tokio = { package = "tokio", version = "0.2.11", optional = true, features = ["io-util"] }
 
 [features]
-std = ["bytes/std", "futures/std", "genio/std", "alloc", "void/std"]
-alloc = ["futures/alloc", "void"]
+std = ["bytes/std", "_futures/std", "genio/std", "alloc", "void/std"]
+alloc = ["_futures/alloc", "void"]
 default = ["std", "alloc"]
 tokio = ["std", "_tokio"]
+futures = []
