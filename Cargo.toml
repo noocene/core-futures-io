@@ -10,6 +10,7 @@ _futures = { package = "futures", version = "0.3.2", default-features = false }
 genio = { version = "0.2.1", default-features = false }
 void = { version = "1.0.2", optional = true, default-features = false }
 _tokio = { package = "tokio", version = "0.2.11", optional = true, features = ["io-util"] }
+pin-project-lite = "0.1.4"
 
 [features]
 std = ["bytes/std", "_futures/std", "genio/std", "alloc", "void/std"]

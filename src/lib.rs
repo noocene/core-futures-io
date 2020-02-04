@@ -7,6 +7,8 @@ mod read;
 pub use read::AsyncRead;
 mod write;
 pub use write::AsyncWrite;
+mod ext;
+pub use ext::AsyncReadExt;
 
 #[cfg(feature = "tokio")]
 mod tokio;
