@@ -1,6 +1,7 @@
 use bytes::Buf;
+#[cfg(not(feature = "std"))]
+use core::ops::DerefMut;
 use core::{
-    ops::DerefMut,
     pin::Pin,
     task::{Context, Poll},
 };
@@ -37,6 +38,7 @@ pub trait AsyncWrite {
     }
 }
 
+#[cfg(not(feature = "std"))]
 macro_rules! deref_async_write {
     () => {
         type Error = T::Error;
@@ -57,7 +59,7 @@ macro_rules! deref_async_write {
     }
 }
 
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "alloc", not(feature = "std")))]
 mod boxed {
     use super::*;
     use alloc::boxed::Box;
@@ -67,10 +69,12 @@ mod boxed {
     }
 }
 
+#[cfg(not(feature = "std"))]
 impl<T: ?Sized + AsyncWrite + Unpin> AsyncWrite for &mut T {
     deref_async_write!();
 }
 
+#[cfg(not(feature = "std"))]
 impl<P> AsyncWrite for Pin<P>
 where
     P: DerefMut + Unpin,
@@ -95,7 +99,7 @@ where
     }
 }
 
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "alloc", not(feature = "std")))]
 mod vec {
     use super::*;
     use alloc::vec::Vec;

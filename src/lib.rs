@@ -7,3 +7,8 @@ mod read;
 pub use read::AsyncRead;
 mod write;
 pub use write::AsyncWrite;
+
+#[cfg(feature = "tokio")]
+mod tokio;
+#[cfg(feature = "tokio")]
+pub use self::tokio::Compat;
