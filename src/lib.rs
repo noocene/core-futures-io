@@ -3,6 +3,14 @@
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
+use _futures::ready;
+use core::{
+    future::Future,
+    pin::Pin,
+    task::{Context, Poll},
+};
+use void::Void;
+
 mod read;
 pub use read::AsyncRead;
 mod write;
@@ -19,3 +27,180 @@ pub use self::tokio::Compat as TokioCompat;
 mod futures;
 #[cfg(feature = "futures")]
 pub use self::futures::Compat as FuturesCompat;
+
+#[derive(Debug)]
+pub struct Empty;
+
+impl AsyncRead for Empty {
+    type Error = Void;
+
+    #[inline]
+    fn poll_read(
+        self: Pin<&mut Self>,
+        _: &mut Context<'_>,
+        _: &mut [u8],
+    ) -> Poll<Result<usize, Self::Error>> {
+        Poll::Ready(Ok(0))
+    }
+}
+
+#[derive(Debug)]
+pub struct Sink;
+
+impl AsyncWrite for Sink {
+    type Error = Void;
+
+    #[inline]
+    fn poll_write(
+        self: Pin<&mut Self>,
+        _: &mut Context<'_>,
+        buf: &[u8],
+    ) -> Poll<Result<usize, Self::Error>> {
+        Poll::Ready(Ok(buf.len()))
+    }
+
+    #[inline]
+    fn poll_flush(self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        Poll::Ready(Ok(()))
+    }
+
+    #[inline]
+    fn poll_shutdown(self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        Poll::Ready(Ok(()))
+    }
+}
+
+#[derive(Debug)]
+pub struct Repeat(u8);
+
+impl Repeat {
+    pub fn new(item: u8) -> Self {
+        Repeat(item)
+    }
+}
+
+impl AsyncRead for Repeat {
+    type Error = Void;
+
+    #[inline]
+    fn poll_read(
+        self: Pin<&mut Self>,
+        _: &mut Context<'_>,
+        buf: &mut [u8],
+    ) -> Poll<Result<usize, Self::Error>> {
+        for byte in &mut *buf {
+            *byte = self.0;
+        }
+        Poll::Ready(Ok(buf.len()))
+    }
+}
+
+#[cfg(not(feature = "alloc"))]
+#[must_use = "futures do nothing unless you `.await` or poll them"]
+pub struct Copy<'a, R: ?Sized, W: ?Sized> {
+    reader: &'a mut R,
+    read_done: bool,
+    writer: &'a mut W,
+    pos: usize,
+    cap: usize,
+    amt: u64,
+    buf: [u8; 2048],
+}
+
+#[cfg(feature = "alloc")]
+#[must_use = "futures do nothing unless you `.await` or poll them"]
+pub struct Copy<'a, R: ?Sized, W: ?Sized> {
+    reader: &'a mut R,
+    read_done: bool,
+    writer: &'a mut W,
+    pos: usize,
+    cap: usize,
+    amt: u64,
+    buf: alloc::boxed::Box<[u8]>,
+}
+
+#[cfg(feature = "alloc")]
+pub fn copy<'a, R, W>(reader: &'a mut R, writer: &'a mut W) -> Copy<'a, R, W>
+where
+    R: AsyncRead + Unpin + ?Sized,
+    W: AsyncWrite + Unpin + ?Sized,
+{
+    Copy {
+        reader,
+        read_done: false,
+        writer,
+        amt: 0,
+        pos: 0,
+        cap: 0,
+        buf: alloc::boxed::Box::new([0; 2048]),
+    }
+}
+
+#[cfg(not(feature = "alloc"))]
+pub fn copy<'a, R, W>(reader: &'a mut R, writer: &'a mut W) -> Copy<'a, R, W>
+where
+    R: AsyncRead + Unpin + ?Sized,
+    W: AsyncWrite + Unpin + ?Sized,
+{
+    Copy {
+        reader,
+        read_done: false,
+        writer,
+        amt: 0,
+        pos: 0,
+        cap: 0,
+        buf: [0; 2048],
+    }
+}
+
+#[derive(Debug)]
+pub enum CopyError<Read, Write> {
+    Read(Read),
+    Write(Write),
+    WriteZero,
+}
+
+impl<R, W> Future for Copy<'_, R, W>
+where
+    R: AsyncRead + Unpin + ?Sized,
+    W: AsyncWrite + Unpin + ?Sized,
+{
+    type Output = Result<u64, CopyError<R::Error, W::Error>>;
+
+    fn poll(
+        mut self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+    ) -> Poll<Result<u64, CopyError<R::Error, W::Error>>> {
+        loop {
+            if self.pos == self.cap && !self.read_done {
+                let me = &mut *self;
+                let n = ready!(Pin::new(&mut *me.reader).poll_read(cx, &mut me.buf))
+                    .map_err(CopyError::Read)?;
+                if n == 0 {
+                    self.read_done = true;
+                } else {
+                    self.pos = 0;
+                    self.cap = n;
+                }
+            }
+
+            while self.pos < self.cap {
+                let me = &mut *self;
+                let i = ready!(Pin::new(&mut *me.writer).poll_write(cx, &me.buf[me.pos..me.cap]))
+                    .map_err(CopyError::Write)?;
+                if i == 0 {
+                    return Poll::Ready(Err(CopyError::WriteZero));
+                } else {
+                    self.pos += i;
+                    self.amt += i as u64;
+                }
+            }
+
+            if self.pos == self.cap && self.read_done {
+                let me = &mut *self;
+                ready!(Pin::new(&mut *me.writer).poll_flush(cx)).map_err(CopyError::Write)?;
+                return Poll::Ready(Ok(self.amt));
+            }
+        }
+    }
+}
