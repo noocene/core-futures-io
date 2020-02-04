@@ -39,7 +39,7 @@ macro_rules! writer {
         where
             W: AsyncWrite,
         {
-            type Output = Result<(), W::Error>;
+            type Output = Result<(), W::WriteError>;
 
             fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
                 let mut me = self.project();
@@ -86,7 +86,7 @@ macro_rules! writer8 {
         where
             W: AsyncWrite,
         {
-            type Output = Result<(), W::Error>;
+            type Output = Result<(), W::WriteError>;
 
             fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
                 let me = self.project();

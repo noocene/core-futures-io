@@ -27,9 +27,9 @@ where
     W: AsyncWrite,
     B: Buf,
 {
-    type Output = Result<usize, W::Error>;
+    type Output = Result<usize, W::WriteError>;
 
-    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<usize, W::Error>> {
+    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<usize, W::WriteError>> {
         unsafe {
             let me = self.get_unchecked_mut();
             Pin::new_unchecked(&mut *me.writer).poll_write_buf(cx, &mut me.buf)

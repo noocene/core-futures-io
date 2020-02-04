@@ -21,7 +21,7 @@ impl<A> Future for Flush<'_, A>
 where
     A: AsyncWrite + Unpin + ?Sized,
 {
-    type Output = Result<(), A::Error>;
+    type Output = Result<(), A::FlushError>;
 
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         let me = &mut *self;

@@ -1,13 +1,13 @@
 use crate::AsyncWrite;
+mod close;
 mod flush;
-mod shutdown;
 mod write;
 mod write_all;
 mod write_buf;
 mod write_int;
 use bytes::Buf;
+use close::{close, Close};
 use flush::{flush, Flush};
-use shutdown::{shutdown, Shutdown};
 use write::{write, Write};
 use write_all::{write_all, WriteAll};
 use write_buf::{write_buf, WriteBuf};
@@ -73,11 +73,11 @@ pub trait AsyncWriteExt: AsyncWrite {
         flush(self)
     }
 
-    fn shutdown(&mut self) -> Shutdown<'_, Self>
+    fn close(&mut self) -> Close<'_, Self>
     where
         Self: Unpin,
     {
-        shutdown(self)
+        close(self)
     }
 }
 

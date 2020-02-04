@@ -24,9 +24,9 @@ impl<W> Future for Write<'_, W>
 where
     W: AsyncWrite + Unpin + ?Sized,
 {
-    type Output = Result<usize, W::Error>;
+    type Output = Result<usize, W::WriteError>;
 
-    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<usize, W::Error>> {
+    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<usize, W::WriteError>> {
         let me = &mut *self;
         Pin::new(&mut *me.writer).poll_write(cx, me.buf)
     }

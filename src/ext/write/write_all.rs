@@ -37,12 +37,12 @@ impl<W> Future for WriteAll<'_, W>
 where
     W: AsyncWrite + Unpin,
 {
-    type Output = Result<(), WriteAllError<W::Error>>;
+    type Output = Result<(), WriteAllError<W::WriteError>>;
 
     fn poll(
         mut self: Pin<&mut Self>,
         cx: &mut Context<'_>,
-    ) -> Poll<Result<(), WriteAllError<W::Error>>> {
+    ) -> Poll<Result<(), WriteAllError<W::WriteError>>> {
         let me = &mut *self;
         while !me.buf.is_empty() {
             let n = ready!(Pin::new(&mut me.writer).poll_write(cx, me.buf))?;

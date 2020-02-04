@@ -48,24 +48,26 @@ impl AsyncRead for Empty {
 pub struct Sink;
 
 impl AsyncWrite for Sink {
-    type Error = Void;
+    type WriteError = Void;
+    type FlushError = Void;
+    type CloseError = Void;
 
     #[inline]
     fn poll_write(
         self: Pin<&mut Self>,
         _: &mut Context<'_>,
         buf: &[u8],
-    ) -> Poll<Result<usize, Self::Error>> {
+    ) -> Poll<Result<usize, Self::WriteError>> {
         Poll::Ready(Ok(buf.len()))
     }
 
     #[inline]
-    fn poll_flush(self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+    fn poll_flush(self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<Result<(), Self::FlushError>> {
         Poll::Ready(Ok(()))
     }
 
     #[inline]
-    fn poll_shutdown(self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+    fn poll_close(self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<Result<(), Self::CloseError>> {
         Poll::Ready(Ok(()))
     }
 }
@@ -154,9 +156,10 @@ where
 }
 
 #[derive(Debug)]
-pub enum CopyError<Read, Write> {
-    Read(Read),
-    Write(Write),
+pub enum CopyError<R: AsyncRead + ?Sized, W: AsyncWrite + ?Sized> {
+    Read(R::Error),
+    Write(W::WriteError),
+    Flush(W::FlushError),
     WriteZero,
 }
 
@@ -165,12 +168,9 @@ where
     R: AsyncRead + Unpin + ?Sized,
     W: AsyncWrite + Unpin + ?Sized,
 {
-    type Output = Result<u64, CopyError<R::Error, W::Error>>;
+    type Output = Result<u64, CopyError<R, W>>;
 
-    fn poll(
-        mut self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
-    ) -> Poll<Result<u64, CopyError<R::Error, W::Error>>> {
+    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<u64, CopyError<R, W>>> {
         loop {
             if self.pos == self.cap && !self.read_done {
                 let me = &mut *self;
@@ -198,7 +198,7 @@ where
 
             if self.pos == self.cap && self.read_done {
                 let me = &mut *self;
-                ready!(Pin::new(&mut *me.writer).poll_flush(cx)).map_err(CopyError::Write)?;
+                ready!(Pin::new(&mut *me.writer).poll_flush(cx)).map_err(CopyError::Flush)?;
                 return Poll::Ready(Ok(self.amt));
             }
         }

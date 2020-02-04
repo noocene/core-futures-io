@@ -6,25 +6,25 @@ use core::{
 };
 
 #[derive(Debug)]
-pub struct Shutdown<'a, A: ?Sized> {
+pub struct Close<'a, A: ?Sized> {
     a: &'a mut A,
 }
 
-pub(super) fn shutdown<A>(a: &mut A) -> Shutdown<'_, A>
+pub(super) fn close<A>(a: &mut A) -> Close<'_, A>
 where
     A: AsyncWrite + Unpin + ?Sized,
 {
-    Shutdown { a }
+    Close { a }
 }
 
-impl<A> Future for Shutdown<'_, A>
+impl<A> Future for Close<'_, A>
 where
     A: AsyncWrite + Unpin + ?Sized,
 {
-    type Output = Result<(), A::Error>;
+    type Output = Result<(), A::CloseError>;
 
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         let me = &mut *self;
-        Pin::new(&mut *me.a).poll_shutdown(cx)
+        Pin::new(&mut *me.a).poll_close(cx)
     }
 }
