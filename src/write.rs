@@ -1,6 +1,6 @@
 use _futures::ready;
 use bytes::Buf;
-#[cfg(not(feature = "std"))]
+#[cfg(not(any(feature = "tokio", feature = "futures")))]
 use core::ops::DerefMut;
 use core::{
     pin::Pin,
@@ -38,7 +38,7 @@ pub trait AsyncWrite {
     }
 }
 
-#[cfg(not(feature = "std"))]
+#[cfg(not(any(feature = "tokio", feature = "futures")))]
 macro_rules! deref_async_write {
     () => {
         type Error = T::Error;
@@ -59,7 +59,7 @@ macro_rules! deref_async_write {
     }
 }
 
-#[cfg(all(feature = "alloc", not(feature = "std")))]
+#[cfg(all(feature = "alloc", not(any(feature = "tokio", feature = "futures"))))]
 mod boxed {
     use super::*;
     use alloc::boxed::Box;
@@ -69,12 +69,12 @@ mod boxed {
     }
 }
 
-#[cfg(not(feature = "std"))]
+#[cfg(not(any(feature = "tokio", feature = "futures")))]
 impl<T: ?Sized + AsyncWrite + Unpin> AsyncWrite for &mut T {
     deref_async_write!();
 }
 
-#[cfg(not(feature = "std"))]
+#[cfg(not(any(feature = "tokio", feature = "futures")))]
 impl<P> AsyncWrite for Pin<P>
 where
     P: DerefMut + Unpin,
@@ -99,7 +99,7 @@ where
     }
 }
 
-#[cfg(all(feature = "alloc", not(feature = "std")))]
+#[cfg(all(feature = "alloc", not(any(feature = "tokio", feature = "futures"))))]
 mod vec {
     use super::*;
     use alloc::vec::Vec;
