@@ -72,6 +72,6 @@ where
             bytes,
             start_len,
         } = &mut *self;
-        read_to_string_internal::<A>(Pin::new(reader), cx, buf, bytes, *start_len)
+        read_to_string_internal(Pin::new(reader), cx, buf, bytes, *start_len)
     }
 }

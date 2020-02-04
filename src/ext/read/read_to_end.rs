@@ -91,6 +91,6 @@ where
 
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         let this = &mut *self;
-        read_to_end_internal::<A>(Pin::new(&mut this.reader), cx, this.buf, this.start_len)
+        read_to_end_internal(Pin::new(&mut this.reader), cx, this.buf, this.start_len)
     }
 }

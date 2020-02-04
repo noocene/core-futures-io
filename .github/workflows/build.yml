@@ -25,9 +25,11 @@ jobs:
       run: cargo build --features tokio
     - name: Build with async-std adapters (futures-rs)
       run: cargo build --features futures
+    - name: Build with all adapters
+      run: cargo build --features futures,tokio
     - name: Build documentation
       run: |
-        cargo rustdoc
+        cargo rustdoc --features futures,tokio
         echo "<!DOCTYPE html><html><head><script>window.location.replace(\"/core-futures-io/core_futures_io\");</script></head></html>" > target/doc/index.html
     - name: Deploy documentation
       uses: JamesIves/github-pages-deploy-action@2.0.3

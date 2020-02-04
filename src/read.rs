@@ -1,13 +1,11 @@
 use _futures::ready;
 use bytes::BufMut;
-#[cfg(not(any(feature = "tokio", feature = "futures")))]
 use core::ops::DerefMut;
 use core::{
     mem::MaybeUninit,
     pin::Pin,
     task::{Context, Poll},
 };
-#[cfg(not(any(feature = "tokio", feature = "futures")))]
 use genio::Read;
 
 pub trait AsyncRead {
@@ -57,7 +55,6 @@ pub trait AsyncRead {
     }
 }
 
-#[cfg(not(any(feature = "tokio", feature = "futures")))]
 macro_rules! deref_async_read {
     () => {
         type Error = T::Error;
@@ -74,7 +71,7 @@ macro_rules! deref_async_read {
     }
 }
 
-#[cfg(all(feature = "alloc", not(any(feature = "tokio", feature = "futures"))))]
+#[cfg(feature = "alloc")]
 mod boxed {
     use super::*;
     use alloc::boxed::Box;
@@ -84,12 +81,10 @@ mod boxed {
     }
 }
 
-#[cfg(not(any(feature = "tokio", feature = "futures")))]
 impl<T: ?Sized + AsyncRead + Unpin> AsyncRead for &mut T {
     deref_async_read!();
 }
 
-#[cfg(not(any(feature = "tokio", feature = "futures")))]
 impl<P> AsyncRead for Pin<P>
 where
     P: DerefMut + Unpin,
@@ -110,7 +105,6 @@ where
     }
 }
 
-#[cfg(not(any(feature = "tokio", feature = "futures")))]
 impl AsyncRead for &[u8] {
     type Error = <Self as Read>::ReadError;
 
