@@ -47,6 +47,12 @@ impl<T: Unpin + FAsyncWrite> AsyncWrite for Compat<T> {
 
 pub struct Compat<T>(T);
 
+impl<T> Compat<T> {
+    pub fn new(input: T) -> Self {
+        Compat(input)
+    }
+}
+
 impl<T: Unpin + AsyncWrite> FAsyncWrite for Compat<T>
 where
     T::WriteError: Into<Box<dyn std::error::Error + Sync + Send>>,
