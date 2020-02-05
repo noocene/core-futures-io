@@ -27,7 +27,6 @@ macro_rules! reader {
     };
     ($name:ident, $ty:ty, $reader:ident, $bytes:expr) => {
         pin_project! {
-            #[doc(hidden)]
             pub struct $name<R> {
                 #[pin]
                 src: R,

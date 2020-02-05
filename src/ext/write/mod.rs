@@ -6,13 +6,18 @@ mod write_all;
 mod write_buf;
 mod write_int;
 use bytes::Buf;
-use close::{close, Close};
-use flush::{flush, Flush};
-use write::{write, Write};
-use write_all::{write_all, WriteAll};
-use write_buf::{write_buf, WriteBuf};
-use write_int::{WriteI128, WriteI16, WriteI32, WriteI64, WriteI8};
-use write_int::{WriteU128, WriteU16, WriteU32, WriteU64, WriteU8};
+use close::close;
+pub use close::Close;
+use flush::flush;
+pub use flush::Flush;
+use write::write;
+pub use write::Write;
+use write_all::write_all;
+pub use write_all::WriteAll;
+use write_buf::write_buf;
+pub use write_buf::WriteBuf;
+pub use write_int::{WriteI128, WriteI16, WriteI32, WriteI64, WriteI8};
+pub use write_int::{WriteU128, WriteU16, WriteU32, WriteU64, WriteU8};
 
 macro_rules! write_impl {
     (

@@ -12,17 +12,26 @@ mod read_to_string;
 mod take;
 #[cfg(feature = "alloc")]
 use alloc::{string::String, vec::Vec};
-use chain::{chain, Chain};
-use read::{read, Read};
-use read_buf::{read_buf, ReadBuf};
-use read_exact::{read_exact, ReadExact};
-use read_int::{ReadI128, ReadI16, ReadI32, ReadI64, ReadI8};
-use read_int::{ReadU128, ReadU16, ReadU32, ReadU64, ReadU8};
+use chain::chain;
+pub use chain::Chain;
+use read::read;
+pub use read::Read;
+use read_buf::read_buf;
+pub use read_buf::ReadBuf;
+use read_exact::read_exact;
+pub use read_exact::ReadExact;
+pub use read_int::{ReadI128, ReadI16, ReadI32, ReadI64, ReadI8};
+pub use read_int::{ReadU128, ReadU16, ReadU32, ReadU64, ReadU8};
 #[cfg(feature = "alloc")]
-use read_to_end::{read_to_end, ReadToEnd};
+use read_to_end::read_to_end;
 #[cfg(feature = "alloc")]
-use read_to_string::{read_to_string, ReadToString};
-use take::{take, Take};
+pub use read_to_end::ReadToEnd;
+#[cfg(feature = "alloc")]
+use read_to_string::read_to_string;
+#[cfg(feature = "alloc")]
+pub use read_to_string::ReadToString;
+use take::take;
+pub use take::Take;
 
 macro_rules! read_impl {
     (
