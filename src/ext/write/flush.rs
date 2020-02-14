@@ -23,7 +23,7 @@ where
 {
     type Output = Result<(), A::FlushError>;
 
-    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+    fn poll(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output> {
         let me = &mut *self;
         Pin::new(&mut *me.a).poll_flush(cx)
     }

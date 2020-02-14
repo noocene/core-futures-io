@@ -45,7 +45,7 @@ impl Drop for Guard<'_> {
 
 pub(super) fn read_to_end_internal<R: AsyncRead + ?Sized>(
     mut rd: Pin<&mut R>,
-    cx: &mut Context<'_>,
+    cx: &mut Context,
     buf: &mut Vec<u8>,
     start_len: usize,
 ) -> Poll<Result<usize, R::Error>> {
@@ -89,7 +89,7 @@ where
 {
     type Output = Result<usize, A::Error>;
 
-    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+    fn poll(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output> {
         let this = &mut *self;
         read_to_end_internal(Pin::new(&mut this.reader), cx, this.buf, this.start_len)
     }

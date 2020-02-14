@@ -20,13 +20,13 @@ pub trait AsyncRead {
 
     fn poll_read(
         self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
+        cx: &mut Context,
         buf: &mut [u8],
     ) -> Poll<Result<usize, Self::Error>>;
 
     fn poll_read_buf<B: BufMut>(
         self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
+        cx: &mut Context,
         buf: &mut B,
     ) -> Poll<Result<usize, Self::Error>>
     where
@@ -63,7 +63,7 @@ macro_rules! deref_async_read {
             (**self).prepare_uninitialized_buffer(buf)
         }
 
-        fn poll_read(mut self: Pin<&mut Self>, cx: &mut Context<'_>, buf: &mut [u8])
+        fn poll_read(mut self: Pin<&mut Self>, cx: &mut Context, buf: &mut [u8])
             -> Poll<Result<usize, Self::Error>>
         {
             Pin::new(&mut **self).poll_read(cx, buf)
@@ -98,7 +98,7 @@ where
 
     fn poll_read(
         self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
+        cx: &mut Context,
         buf: &mut [u8],
     ) -> Poll<Result<usize, Self::Error>> {
         self.get_mut().as_mut().poll_read(cx, buf)
@@ -114,7 +114,7 @@ impl AsyncRead for &[u8] {
 
     fn poll_read(
         self: Pin<&mut Self>,
-        _cx: &mut Context<'_>,
+        _cx: &mut Context,
         buf: &mut [u8],
     ) -> Poll<Result<usize, Self::Error>> {
         Poll::Ready(Read::read(self.get_mut(), buf))

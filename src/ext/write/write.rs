@@ -26,7 +26,7 @@ where
 {
     type Output = Result<usize, W::WriteError>;
 
-    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<usize, W::WriteError>> {
+    fn poll(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Result<usize, W::WriteError>> {
         let me = &mut *self;
         Pin::new(&mut *me.writer).poll_write(cx, me.buf)
     }

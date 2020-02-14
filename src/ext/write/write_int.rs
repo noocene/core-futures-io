@@ -41,7 +41,7 @@ macro_rules! writer {
         {
             type Output = Result<(), W::WriteError>;
 
-            fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+            fn poll(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output> {
                 let mut me = self.project();
 
                 if *me.written == $bytes as u8 {
@@ -88,7 +88,7 @@ macro_rules! writer8 {
         {
             type Output = Result<(), W::WriteError>;
 
-            fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+            fn poll(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output> {
                 let me = self.project();
 
                 let buf = [*me.byte as u8];

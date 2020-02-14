@@ -51,7 +51,7 @@ macro_rules! reader {
         {
             type Output = Result<$ty, ReadIntError<R::Error>>;
 
-            fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+            fn poll(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output> {
                 let mut me = self.project();
 
                 if *me.read == $bytes as u8 {
@@ -103,7 +103,7 @@ macro_rules! reader8 {
         {
             type Output = Result<$ty, ReadIntError<R::Error>>;
 
-            fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+            fn poll(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output> {
                 let me = self.project();
 
                 let mut buf = [0; 1];

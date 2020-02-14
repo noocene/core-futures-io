@@ -61,7 +61,7 @@ impl<R: AsyncRead> AsyncRead for Take<R> {
 
     fn poll_read(
         self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
+        cx: &mut Context,
         buf: &mut [u8],
     ) -> Poll<Result<usize, Self::Error>> {
         if self.limit_ == 0 {

@@ -28,7 +28,7 @@ where
 {
     type Output = Result<usize, R::Error>;
 
-    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<usize, R::Error>> {
+    fn poll(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Result<usize, R::Error>> {
         unsafe {
             let me = self.get_unchecked_mut();
             Pin::new_unchecked(&mut *me.reader).poll_read_buf(cx, &mut me.buf)

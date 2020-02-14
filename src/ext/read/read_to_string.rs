@@ -43,7 +43,7 @@ where
 
 fn read_to_string_internal<R: AsyncRead + ?Sized>(
     reader: Pin<&mut R>,
-    cx: &mut Context<'_>,
+    cx: &mut Context,
     buf: &mut String,
     bytes: &mut Vec<u8>,
     start_len: usize,
@@ -65,7 +65,7 @@ where
 {
     type Output = Result<usize, ReadToStringError<A::Error>>;
 
-    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+    fn poll(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output> {
         let Self {
             reader,
             buf,

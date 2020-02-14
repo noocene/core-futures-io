@@ -41,7 +41,7 @@ where
 
     fn poll(
         mut self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
+        cx: &mut Context,
     ) -> Poll<Result<(), WriteAllError<W::WriteError>>> {
         let me = &mut *self;
         while !me.buf.is_empty() {

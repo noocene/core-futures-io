@@ -13,19 +13,17 @@ pub trait AsyncWrite {
 
     fn poll_write(
         self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
+        cx: &mut Context,
         buf: &[u8],
     ) -> Poll<Result<usize, Self::WriteError>>;
 
-    fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>)
-        -> Poll<Result<(), Self::FlushError>>;
+    fn poll_flush(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Result<(), Self::FlushError>>;
 
-    fn poll_close(self: Pin<&mut Self>, cx: &mut Context<'_>)
-        -> Poll<Result<(), Self::CloseError>>;
+    fn poll_close(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Result<(), Self::CloseError>>;
 
     fn poll_write_buf<B: Buf>(
         self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
+        cx: &mut Context,
         buf: &mut B,
     ) -> Poll<Result<usize, Self::WriteError>>
     where
@@ -47,17 +45,17 @@ macro_rules! deref_async_write {
         type FlushError = T::FlushError;
         type CloseError = T::CloseError;
 
-        fn poll_write(mut self: Pin<&mut Self>, cx: &mut Context<'_>, buf: &[u8])
+        fn poll_write(mut self: Pin<&mut Self>, cx: &mut Context, buf: &[u8])
             -> Poll<Result<usize, Self::WriteError>>
         {
             Pin::new(&mut **self).poll_write(cx, buf)
         }
 
-        fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::FlushError>> {
+        fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Result<(), Self::FlushError>> {
             Pin::new(&mut **self).poll_flush(cx)
         }
 
-        fn poll_close(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::CloseError>> {
+        fn poll_close(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Result<(), Self::CloseError>> {
             Pin::new(&mut **self).poll_close(cx)
         }
     }
@@ -88,23 +86,17 @@ where
 
     fn poll_write(
         self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
+        cx: &mut Context,
         buf: &[u8],
     ) -> Poll<Result<usize, Self::WriteError>> {
         self.get_mut().as_mut().poll_write(cx, buf)
     }
 
-    fn poll_flush(
-        self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
-    ) -> Poll<Result<(), Self::FlushError>> {
+    fn poll_flush(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Result<(), Self::FlushError>> {
         self.get_mut().as_mut().poll_flush(cx)
     }
 
-    fn poll_close(
-        self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
-    ) -> Poll<Result<(), Self::CloseError>> {
+    fn poll_close(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Result<(), Self::CloseError>> {
         self.get_mut().as_mut().poll_close(cx)
     }
 }
@@ -122,7 +114,7 @@ mod vec {
 
         fn poll_write(
             self: Pin<&mut Self>,
-            _cx: &mut Context<'_>,
+            _cx: &mut Context,
             buf: &[u8],
         ) -> Poll<Result<usize, Self::WriteError>> {
             self.get_mut().extend_from_slice(buf);
@@ -131,14 +123,14 @@ mod vec {
 
         fn poll_flush(
             self: Pin<&mut Self>,
-            _cx: &mut Context<'_>,
+            _cx: &mut Context,
         ) -> Poll<Result<(), Self::FlushError>> {
             Poll::Ready(Ok(()))
         }
 
         fn poll_close(
             self: Pin<&mut Self>,
-            _cx: &mut Context<'_>,
+            _cx: &mut Context,
         ) -> Poll<Result<(), Self::CloseError>> {
             Poll::Ready(Ok(()))
         }

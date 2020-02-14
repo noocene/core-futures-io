@@ -47,7 +47,7 @@ where
 
     fn poll(
         mut self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
+        cx: &mut Context,
     ) -> Poll<Result<usize, ReadExactError<A::Error>>> {
         loop {
             if self.pos < self.buf.len() {
