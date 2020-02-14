@@ -204,3 +204,10 @@ where
         }
     }
 }
+
+pub trait Split: AsyncRead + AsyncWrite {
+    type ReadHalf: AsyncRead;
+    type WriteHalf: AsyncWrite;
+
+    fn split(self) -> (Self::ReadHalf, Self::WriteHalf);
+}
